@@ -1,0 +1,105 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+
+struct Node* createNode(char ch, int freq)
+{
+    struct Node* node;
+    node = (struct Node*)malloc(sizeof(struct Node));
+
+    node->ch = ch;
+    node->freq = freq;
+    node->left = NULL;
+    node->right = NULL;
+
+    return node;
+}
+
+void printCodes(struct Node* root, int code[], int top)
+{
+    int i;
+
+    if (root == NULL)
+        return;
+
+    if (root->left != NULL) {
+        code[top] = 0;
+        printCodes(root->left, code, top + 1);
+    }
+
+    if (root->right != NULL) {
+        code[top] = 1;
+        printCodes(root->right, code, top + 1);
+    }
+
+    if (root->left == NULL && root->right == NULL) {
+        printf("%c: ", root->ch);
+
+        if (top == 0)
+            printf("0");
+
+        for (i = 0; i < top; i++)
+            printf("%d", code[i]);
+
+        printf("\n");
+    }
+}
+
+int main()
+{
+    int n, i, j, freq;
+    char ch;
+    struct Node *nodes[100], *temp, *left, *right, *merged;
+    int code[100];
+
+    printf("Enter number of characters: ");
+    scanf("%d", &n);
+
+    if (n < 1 || n > 100) {
+        printf("Invalid number of characters.\n");
+        return 0;
+    }
+
+    for (i = 0; i < n; i++) {
+        printf("Enter character and frequency: ");
+        scanf(" %c %d", &ch, &freq);
+
+        if (freq <= 0) {
+            printf("Frequency must be positive.\n");
+            return 0;
+        }
+
+        nodes[i] = createNode(ch, freq);
+    }
+
+    while (n > 1) {
+        for (i = 0; i < n - 1; i++) {
+            for (j = i + 1; j < n; j++) {
+                if (nodes[i]->freq > nodes[j]->freq) {
+                    temp = nodes[i];
+                    nodes[i] = nodes[j];
+                    nodes[j] = temp;
+                }
+            }
+        }
+
+        left = nodes[0];
+        right = nodes[1];
+
+        merged = createNode('$', left->freq + right->freq);
+        merged->left = left;
+        merged->right = right;
+
+        nodes[0] = merged;
+
+        for (i = 1; i < n - 1; i++)
+            nodes[i] = nodes[i + 1];
+
+        n--;
+    }
+
+    printf("Huffman Codes:");
+    printCodes(nodes[0], code, 0);
+
+    return 0;
+}
